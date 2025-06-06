@@ -1,0 +1,114 @@
+/* style.css – minimal cleaned styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    overflow: hidden;
+  }
+  
+.stadium {
+    position: absolute;
+    width: 580px;
+    height: 580px;
+    border-radius: 50%;
+    background: #0044aa; /* blue */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6) inset;
+}
+.circle {
+    position: absolute;
+    width: 100%; /* Make it cover the stadium */
+    height: 100%; /* Make it cover the stadium */
+    border-radius: 50%;
+    background-color: rgba(253, 254, 255, 0.5); /* Semi-transparent */
+    z-index: 1; /* Ensure it appears above the stadium */
+}
+  
+  .beyblade {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: none;
+    cursor: grab;
+    animation: spin 1s linear infinite;
+  }
+  
+  .beyblade2 { /* alternate color */
+    background: radial-gradient(circle, #fff, #0033cc 60%, #000088);
+  }
+  
+  #beyblade {
+    background: radial-gradient(circle, #fff, #ff0000 60%, #c93510);
+}
+.huricane {
+    position: absolute;
+    width: 50px; /* Adjusted width */
+    height: 50px; /* Adjusted height */
+    background: rgba(255, 0, 0, 0.671);
+    border-radius: 50%;
+    top: 50%; /* Center vertically */
+    left: 10px; /* Positioned on the left side */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+}
+.beyblade-image {
+    width: 60%; /* Adjusted width */
+    height: 60%; /* Adjusted height */
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute; /* Added for positioning */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Adjust for centering */
+}
+  
+  /* UI */
+  .controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  button {
+    padding: 10px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    background: #22c55e;
+    color: #fff;
+  }
+  button:disabled { opacity: 0.5; }
+  
+  .stamina-bar {
+    position: absolute;
+    width: 200px;
+    height: 8px;
+    background: #333;
+    top: 10px;
+    left: 10px;
+    display: none;
+  }
+  
+  .stamina-bar::after {
+    content: "";
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #22c55e);
+    width: 100%;
+    transition: width 0.2s;
+  }
+  
+  .stamina-bar.enemy { left: 10px; top: 30px; }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  

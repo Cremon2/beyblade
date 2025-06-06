@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>Beyblade Game (Modular)</title>
+</head>
+<body>
+
+  <!-- Arena -->
+  <div id="stadium" class="stadium"></div>
+  <div class="circ"></div>
+
+  <!-- Beyblades -->
+  <div id="beyblade" class="beyblade">
+    <img src="dragoon.webp" alt="Beyblade" class="beyblade-image" />
+</div>
+    <button id="hurricane" class="huricane">Skill</button>
+    
+  <div id="dranzer"  class="beyblade beyblade2">
+    <img src="dranzer.webp" alt="Beyblade" class="beyblade-image" />
+  </div>
+
+  <!-- UI -->
+  <div id="player" class="player-label"></div>
+  <div class="controls"><button id="launchBeyblade">Launch Battle</button></div>
+
+  <!-- Stamina bars (match IDs in JS) -->
+  <div id="beyblade-stamina" class="stamina-bar"></div>
+  <div id="dranzer-stamina"  class="stamina-bar enemy" style="top: 30px"></div>
+
+  <!-- Sound -->
+  <audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+
+  <!-- Scripts (ESM) -->
+  <script type="module" src="main.js"></script>
+</body>
+</html>
