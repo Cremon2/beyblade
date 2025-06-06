@@ -4,13 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="dranzer.webp" type="image/x-icon" />
   <title>Beyblade Game (Modular)</title>
 </head>
 <body>
 
   <!-- Arena -->
-  <div id="stadium" class="stadium"></div>
-  <div class="circ"></div>
+  <div id="stadium" class="stadium">
+  <div id="circle" class="circle"></div>
+  </div>
 
   <!-- Beyblades -->
   <div id="beyblade" class="beyblade">
@@ -18,8 +20,16 @@
 </div>
     <button id="hurricane" class="huricane">Skill</button>
     
-  <div id="dranzer"  class="beyblade beyblade2">
+  <div id="dranzer"  class="beyblade dranzer">
     <img src="dranzer.webp" alt="Beyblade" class="beyblade-image" />
+  </div>
+
+  <div id="draciel" class="beyblade draciel" >
+    <img src="draciel.webp" alt="draciel" class="beyblade-image"/>
+  </div>
+
+  <div class="beyblade byakko" id="byakko">
+    <img src="byakko.jpg" alt="byakko"/>
   </div>
 
   <!-- UI -->
@@ -29,6 +39,8 @@
   <!-- Stamina bars (match IDs in JS) -->
   <div id="beyblade-stamina" class="stamina-bar"></div>
   <div id="dranzer-stamina"  class="stamina-bar enemy" style="top: 30px"></div>
+  <div id="draciel-stamina" class="stamina-bar enemy" style="top: 60px"></div>
+  <div id="byakko-stamina" class="stamina-bar enemy" style="top: 90px"></div>
 
   <!-- Sound -->
   <audio id="hitSound" src="hit.mp3" preload="auto"></audio>

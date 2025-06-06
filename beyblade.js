@@ -11,6 +11,7 @@ export default class Beyblade {
         this.power = power;
         this.type = type; 
         this.lastHitTime = 0;
+        this.clockwise = true;
 
       
         this.posX = 0;
@@ -23,7 +24,7 @@ export default class Beyblade {
     setStatsByType(baseStamina, basePower) {
       switch (this.type) {
         case "attack":
-          this.power = basePower + 50;
+          this.power = basePower + 100;
           this.stamina = baseStamina - 200;
           break;
         case "defense":
