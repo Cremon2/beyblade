@@ -41,19 +41,19 @@ body {
     animation: spin 1s linear infinite;
   }
   
-  .dranzer { /* alternate color */
+  #dranzer { /* alternate color */
     background: radial-gradient(circle, #fff, #0033cc 60%, #000088);
   }
   
   #beyblade {
     background: radial-gradient(circle, #fff, #ff0000 60%, #c93510);
-}
-.draciel {
-    background: radial-gradient(circle, #fff, #00ff00 60%, #007700);
-}
-.byakko {
-    background: radial-gradient(circle, #fff, #ffff00 60%, #999900);
-}
+  }
+  #draciel {
+      background: radial-gradient(circle, #fff, #00ff00 60%, #007700);
+  }
+  #byakko {
+      background: radial-gradient(circle, #fff, #ffff00 60%, #999900);
+  }
 .huricane {
     position: absolute;
     width: 50px; /* Adjusted width */
