@@ -29,7 +29,7 @@ start() {
     this.lastTime = performance.now();
     setTimeout(() => {
         requestAnimationFrame(this.loop.bind(this));
-    }, 7000);
+    }, 6500);
 }
   
 
@@ -50,11 +50,11 @@ start() {
       
           // Set speed based on stamina and type
           let baseSpeed = Math.min(5, b.stamina / 100); // Default base
-          let orbitMultiplier = 1.0;
+          let orbitMultiplier = 1.5;
       
           switch (b.type) {
             case "attack":
-              orbitMultiplier = 5.0; // ⚡ Attack types move fastest
+              orbitMultiplier = 1.5; // ⚡ Attack types move fastest
               break;
             case "stamina":
               orbitMultiplier = 1.2;

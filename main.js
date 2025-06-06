@@ -20,8 +20,8 @@ const dragoon = new Beyblade("beyblade", "Dragoon", player1, {
   });
   
   const dranzer = new Beyblade("dranzer", "Dranzer", player1, {
-    stamina: 900,
-    power: 10,
+    stamina: 1200,
+    power: 25,
     type: "stamina"
   });
   
