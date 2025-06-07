@@ -20,7 +20,7 @@
 </div>
     <button id="hurricane" class="huricane">Skill</button>
     
-  <div id="dranzer"  class="beyblade dranzer">
+  <div id="dranzer"  class="beyblade">
     <img src="dranzer.webp" alt="Beyblade" class="beyblade-image" />
   </div>
 
@@ -28,24 +28,46 @@
     <img src="draciel.webp" alt="draciel" class="beyblade-image"/>
   </div>
 
-  <div class="beyblade byakko" id="byakko">
-    <img src="byakko.jpg" alt="byakko"/>
+  <div id="byakko" class="beyblade byakko">
+    <img src="byakko.webp" alt="byakko" class="beyblade-image"/>
   </div>
 
   <!-- UI -->
   <div id="player" class="player-label"></div>
+  <!-- Beyblade Selection -->
+  <div class="bey-select-wrapper">
+    <label for="beySelect">Choose Your Beyblade:</label>
+    <select id="beySelect">
+      <option value="beyblade">Dragoon (Attack)</option>
+      <option value="dranzer">Dranzer (Stamina)</option>
+      <option value="draciel">Draciel (Defense)</option>
+      <option value="byakko">Byakko (Balance)</option>
+    </select>
+  </div>
+  
   <div class="controls"><button id="launchBeyblade">Launch Battle</button></div>
 
-  <!-- Stamina bars (match IDs in JS) -->
-  <div id="beyblade-stamina" class="stamina-bar"></div>
-  <div id="dranzer-stamina"  class="stamina-bar enemy" style="top: 30px"></div>
-  <div id="draciel-stamina" class="stamina-bar enemy" style="top: 60px"></div>
-  <div id="byakko-stamina" class="stamina-bar enemy" style="top: 90px"></div>
+  <!-- Stamina Bars -->
+<div id="beyblade-stamina" class="stamina-bar">
+  <div class="fill"></div>
+</div>
 
-  <!-- Sound -->
-  <audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+<div id="dranzer-stamina" class="stamina-bar enemy">
+  <div class="fill"></div>
+</div>
 
-  <!-- Scripts (ESM) -->
-  <script type="module" src="main.js"></script>
+<div id="draciel-stamina" class="stamina-bar enemy">
+  <div class="fill"></div>
+</div>
+
+<div id="byakko-stamina" class="stamina-bar enemy">
+  <div class="fill"></div>
+</div>
+  
+<!-- Sound -->
+<audio id="hitSound" src="hit.mp3" preload="auto"></audio>
+
+<!-- Scripts (ESM) -->
+<script type="module" src="main.js"></script>
 </body>
 </html>

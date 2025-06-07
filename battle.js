@@ -1,7 +1,30 @@
-// battle.js
-// BattleEngine coordinates movement, collisions, stamina drain, and victory
-
+import {
+  normalizedVector,
+  angleBetween,
+  distance,
+  reflectVector
+} from './vectorUtils.js';
 import Beyblade from './beyblade.js';
+
+function getTypeMass(type) {
+  switch (type) {
+    case "attack":  return 1.0;
+    case "stamina": return 1.5;
+    case "defense": return 2.5;
+    case "balance": return 2.0;
+    default:        return 1.5;
+  }
+}
+
+function getTypeEffect(type) {
+  switch (type) {
+    case "attack":  return { knockback: 5.0, staminaDrain: 1.6, reflect: 0.2 };
+    case "defense": return { knockback: 0.8, staminaDrain: 0.8, reflect: 0.7 };
+    case "stamina": return { knockback: 0.9, staminaDrain: 1.4, reflect: 0.2 };
+    case "balance": return { knockback: 1.0, staminaDrain: 1.0, reflect: 0.1 };
+    default:        return { knockback: 1.0, staminaDrain: 1.0, reflect: 0.5 };
+  }
+}
 
 export default class BattleEngine {
   constructor(stadiumEl, blades, {
@@ -10,211 +33,188 @@ export default class BattleEngine {
     tickMs = 16
   } = {}) {
     this.stadiumEl = stadiumEl;
-    this.blades = blades; // array of Beyblade instances
+    this.blades = blades;
     this.staminaDrain = staminaDrain;
     this.wallBounceFactor = wallBounceFactor;
-    this.running = false;
     this.tickMs = tickMs;
+    this.running = false;
 
-    // Pre‑calc stadium geometry
     const rect = stadiumEl.getBoundingClientRect();
     this.cx = rect.left + rect.width / 2;
     this.cy = rect.top + rect.height / 2;
     this.radius = rect.width / 2;
-    this.circleRadius = this.radius * 0.2; 
-
+    this.circleRadius = this.radius * 0.2;
   }
 
-  /** Begin animation loop */
-start() {
+  start() {
     this.running = true;
     this.lastTime = performance.now();
     setTimeout(() => {
-        requestAnimationFrame(this.loop.bind(this));
-    }, 6500);
-}
-  
+      requestAnimationFrame(this.loop.bind(this));
+    }, 6000);
+  }
 
-  /** Main RAF loop */
   loop(now) {
     if (!this.running) return;
-    const dt = (now - this.lastTime) / 1000; // seconds
+    const dt = (now - this.lastTime) / 1000;
     this.lastTime = now;
 
-    // Update every blade
     for (const b of this.blades) {
-        if (b.stamina > 0) {
-          const dx = b.posX - this.cx;
-          const dy = b.posY - this.cy;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          const angle = Math.atan2(dy, dx);
-          const perpendicularAngle = angle + (b.clockwise ? Math.PI / 2 : -Math.PI / 2);      
-          // Set speed based on stamina and type
-          let baseSpeed = Math.min(5, b.stamina / 100); // Default base
-          let orbitMultiplier = 1.5;
-      
-          switch (b.type) {
-            case "attack":
-              orbitMultiplier = 1.5; // ⚡ Attack types move fastest
-              break;
-            case "stamina":
-              orbitMultiplier = 1.2;
-              break;
-            case "defense":
-              orbitMultiplier = 0.8;
-              break;
-            case "balance":
-            default:
-              orbitMultiplier = 1.0;
-              break;
-          }
-      
-          const tangentialSpeed = baseSpeed * orbitMultiplier;
+      if (b.stamina > 0) {
+        const dx = b.posX - this.cx;
+        const dy = b.posY - this.cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
+        const perpendicularAngle = angle + (b.clockwise ? Math.PI / 2 : -Math.PI / 2);
 
-          if (b.reducedOrbit) {
-            // Reduce orbit effect temporarily after strong knockback
-            b.velX *= 0.5;
-            b.velY *= 0.5;
-            b.reducedOrbit = false; // Only apply once
-          } else {
-            b.velX = Math.cos(perpendicularAngle) * tangentialSpeed;
-            b.velY = Math.sin(perpendicularAngle) * tangentialSpeed;
-          }
+        const baseSpeed = Math.min(5, b.stamina / 100);
+        let orbitMultiplier = 1.0;
 
-          // Optional spiral in/out based on stamina
-          const centerPull = (1000 - b.stamina) / 1000;
-          b.velX -= dx / dist * centerPull * 0.5;
-          b.velY -= dy / dist * centerPull * 0.5;
-      
-          b.posX += b.velX;
-          b.posY += b.velY;
-      
-          b.bounceFromBoundary(this.cx, this.cy, this.radius);
-          b.drain(this.staminaDrain);
+        switch (b.type) {
+          case "attack":  orbitMultiplier = 1.5; break;
+          case "stamina": orbitMultiplier = 1.2; break;
+          case "defense": orbitMultiplier = 0.5; break;
+        }
+
+        const tangentialSpeed = baseSpeed * orbitMultiplier;
+
+        if (b.reducedOrbit) {
+          b.velX *= 0.5;
+          b.velY *= 0.5;
+          b.reducedOrbit = false;
+        } else {
+          b.velX = Math.cos(perpendicularAngle) * tangentialSpeed;
+          b.velY = Math.sin(perpendicularAngle) * tangentialSpeed;
+        }
+
+        const basePull = 0.2;
+        const centerPull = basePull + ((1000 - b.stamina) / 1000) * 0.5;
+        b.velX -= dx / dist * centerPull;
+        b.velY -= dy / dist * centerPull;
+
+        b.posX += b.velX;
+        b.posY += b.velY;
+
+        b.bounceFromBoundary(this.cx, this.cy, this.radius);
+        b.drain(this.staminaDrain);
+
+        const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+        if (distFromCenter > this.radius - 40 + 40) {
+          b.stamina = 0;
+          b.element.style.animation = "none";
+          console.log(`${b.name} was knocked out!`);
         }
       }
-      
+    }
 
-    // Collisions (pairwise)
     for (let i = 0; i < this.blades.length; i++) {
       for (let j = i + 1; j < this.blades.length; j++) {
-        const a = this.blades[i];
-        const b = this.blades[j];
+        const a = this.blades[i], b = this.blades[j];
         const now = performance.now();
-a.lastHitTime ??= 0;
-b.lastHitTime ??= 0;
+        a.lastHitTime ??= 0;
+        b.lastHitTime ??= 0;
 
-if (a.isColliding(b) && now - a.lastHitTime > 200 && now - b.lastHitTime > 200) {
-  a.lastHitTime = now;
-  b.lastHitTime = now;
+        if (a.isColliding(b) && now - a.lastHitTime > 200 && now - b.lastHitTime > 200) {
+          a.lastHitTime = now;
+          b.lastHitTime = now;
 
-  // Knockback direction
-  const dx = a.posX - b.posX;
-  const dy = a.posY - b.posY;
-  const angle = Math.atan2(dy, dx);
-
-  // Type effects
-  const typeEffect = (blade) => {
-    switch (blade.type) {
-      case "attack":  return { knockback: 1.5, staminaDrain: 1.6 };
-      case "defense": return { knockback: 0.8, staminaDrain: 0.8 };
-      case "stamina": return { knockback: 0.9, staminaDrain: 1.4 };
-      case "balance": return { knockback: 1.0, staminaDrain: 1.0 };
-      default:        return { knockback: 1.0, staminaDrain: 1.0 };
-    }
-  };
-
-  const effectA = typeEffect(a);
-  const effectB = typeEffect(b);
-  const totalKnockback = effectA.knockback + effectB.knockback;
-
-  // Stamina drain
-  const baseDrain = 20;
-  a.drain(baseDrain * effectB.staminaDrain);
-  b.drain(baseDrain * effectA.staminaDrain);
-
-  // Apply knockback based on type effects
-  a.velX += Math.cos(angle) * (totalKnockback * 100);
-  a.velY += Math.sin(angle) * (totalKnockback * 100);
-  b.velX -= Math.cos(angle) * (totalKnockback * 100);
-  b.velY -= Math.sin(angle) * (totalKnockback * 100);
-  a.clockwise = !a.clockwise;
-  b.clockwise = !b.clockwise;
-  a.reducedOrbit = false; // Reset reduced orbit state
-  b.reducedOrbit = false;
-  a.name = a.name || "Beyblade A"; // Fallback name
-  b.name = b.name || "Beyblade B"; // Fallback name
-  // Log collision
-  console.log(`${a.name} hit ${b.name}: drained ${baseDrain * effectB.staminaDrain} stamina`);
-
-  // Knockback
-  const knockStrength = 500;
-  a.velX += Math.cos(angle) * knockStrength * effectA.knockback;
-  a.velY += Math.sin(angle) * knockStrength * effectA.knockback;
-  b.velX -= Math.cos(angle) * knockStrength * effectB.knockback;
-  b.velY -= Math.sin(angle) * knockStrength * effectB.knockback;
-
-  // Prevent overlapping
-  const separation = 10;
-  a.posX += Math.cos(angle) * separation;
-  a.posY += Math.sin(angle) * separation;
-  b.posX -= Math.cos(angle) * separation;
-  b.posY -= Math.sin(angle) * separation;
-
-// Check if collision midpoint is inside the inner circle
-const midX = (a.posX + b.posX) / 2;
-const midY = (a.posY + b.posY) / 2;
-const distToCenter = Math.hypot(midX - this.cx, midY - this.cy);
-const insideCircle = distToCenter < this.circleRadius;
-
-if (insideCircle) {
-  const ejectForce = 1500; // Stronger knockback
-  const dampingFactor = 0.4; // Reduce tangential motion
-
-  if (effectA.knockback < effectB.knockback) {
-    // Knock A harder and damp orbit
-    a.velX = Math.cos(angle) * ejectForce * dampingFactor;
-    a.velY = Math.sin(angle) * ejectForce * dampingFactor;
-    a.reducedOrbit = true;
-  } else if (effectB.knockback < effectA.knockback) {
-    b.velX = -Math.cos(angle) * ejectForce * dampingFactor;
-    b.velY = -Math.sin(angle) * ejectForce * dampingFactor;
-    b.reducedOrbit = true;
-  } else {
-    // Equal knockback: knock both and reduce both
-    a.velX = Math.cos(angle) * ejectForce * dampingFactor;
-    a.velY = Math.sin(angle) * ejectForce * dampingFactor;
-    b.velX = -Math.cos(angle) * ejectForce * dampingFactor;
-    b.velY = -Math.sin(angle) * ejectForce * dampingFactor;
-    a.reducedOrbit = true;
-    b.reducedOrbit = true;
-  }
-} else {
-  // Outside center: reverse weaker spin direction
-  if (effectA.knockback < effectB.knockback) {
-    a.clockwise = !a.clockwise;
-  } else if (effectB.knockback < effectA.knockback) {
-    b.clockwise = !b.clockwise;
-  }
-}
+          const dx = b.posX - a.posX;
+          const dy = b.posY - a.posY;
+          const angle = angleBetween(a.posX, a.posY, b.posX, b.posY);
+          const { x: normX, y: normY } = normalizedVector(a.posX, a.posY, b.posX, b.posY);
+          const dist = distance(a.posX, a.posY, b.posX, b.posY);
 
 
+          const force = (a.power + b.power) * 0.5;
+          const aMass = getTypeMass(a.type);
+          const bMass = getTypeMass(b.type);
 
-  a.clockwise = !a.clockwise;
-  b.clockwise = !b.clockwise;
+          const effectA = getTypeEffect(a.type);
+          const effectB = getTypeEffect(b.type);
 
-  console.log(`${a.name} hit ${b.name}: drained ${baseDrain * effectB.staminaDrain}`);
-  if (BattleEngine.onHit) BattleEngine.onHit();
-}
+          const knockStrength = 400;
+          const baseDrain = 5;
 
-          
+          // Equal and opposite knockback
+          a.velX -= (force / aMass) * normX;
+          a.velY -= (force / aMass) * normY;
+          b.velX += (force / bMass) * normX;
+          b.velY += (force / bMass) * normY;
+
+          // Knockback with type effect
+          a.velX += normX * knockStrength * effectA.knockback;
+          a.velY += normY * knockStrength * effectA.knockback;
+          b.velX -= normX * knockStrength * effectB.knockback;
+          b.velY -= normY * knockStrength * effectB.knockback;
+
+          // Reflect attacker's velocity if defender has reflect effect
+          if (effectB.reflect > 0) {
+            const reflected = reflectVector(a.velX, a.velY, normX, normY);
+            a.velX = reflected.x * effectB.reflect;
+            a.velY = reflected.y * effectB.reflect;
+          }
+
+          // Reflect defender's velocity if attacker has reflect effect (less common)
+          if (effectA.reflect > 0) {
+            const reflected = reflectVector(b.velX, b.velY, -normX, -normY);
+            b.velX = reflected.x * effectA.reflect;
+            b.velY = reflected.y * effectA.reflect;
+          }
+
+          a.drain(baseDrain * effectB.staminaDrain);
+          b.drain(baseDrain * effectA.staminaDrain);
+
+          // Separation logic
+          const separation = 30;
+          a.posX += normX * separation;
+          a.posY += normY * separation;
+          b.posX -= normX * separation;
+          b.posY -= normY * separation;
+
+          // Minimum distance adjustment
+          const minDistance = 75;
+          const actualDistance = Math.hypot(a.posX - b.posX, a.posY - b.posY);
+          if (actualDistance < minDistance) {
+            const overlap = (minDistance - actualDistance) / 2;
+            a.posX -= normX * overlap;
+            a.posY -= normY * overlap;
+            b.posX += normX * overlap;
+            b.posY += normY * overlap;
+          }
+
+          // Inner circle knockout
+          const midX = (a.posX + b.posX) / 2;
+          const midY = (a.posY + b.posY) / 2;
+          const distToCenter = Math.hypot(midX - this.cx, midY - this.cy);
+
+          if (distToCenter < this.circleRadius) {
+            const ejectForce = 1200;
+            const centerBoost = 1.2;
+            if (effectA.knockback > effectB.knockback) {
+              a.velX += normX * ejectForce * effectA.knockback * centerBoost;
+              a.velY += normY * ejectForce * effectA.knockback * centerBoost;
+              b.velX -= normX * ejectForce * 0.5;
+              b.velY -= normY * ejectForce * 0.5;
+            } else {
+              b.velX -= normX * ejectForce * effectB.knockback * centerBoost;
+              b.velY -= normY * ejectForce * effectB.knockback * centerBoost;
+              a.velX += normX * ejectForce * 0.5;
+              a.velY += normY * ejectForce * 0.5;
+            }
+          }
+
+          // Reverse weaker spinner outside center
+          if (effectA.knockback < effectB.knockback) a.clockwise = !a.clockwise;
+          else if (effectB.knockback < effectA.knockback) b.clockwise = !b.clockwise;
+
+          console.log(`${a.name || 'Blade A'} hit ${b.name || 'Blade B'}`);
+          if (BattleEngine.onHit) BattleEngine.onHit();
+        }
       }
     }
 
-    // Render
     this.blades.forEach(b => b.render());
 
-    // Victory check: if only one spinning
     const spinning = this.blades.filter(b => b.stamina > 0);
     if (spinning.length <= 1) {
       this.running = false;

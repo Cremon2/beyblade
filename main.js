@@ -42,13 +42,22 @@ player1.addBeyblade(dranzer);
 player1.addBeyblade(draciel);
 player1.addBeyblade(byakko);
 
+const beyOptions = {
+  beyblade: dragoon,
+  dranzer: dranzer,
+  draciel: draciel,
+  byakko: byakko
+};
+
 // Prepare scoreboard UI
 document.getElementById('player').textContent = player1.name;
 
-dragoon.spawn(stadiumEl.offsetLeft + 150, stadiumEl.offsetTop + 130);
-dranzer.spawn(stadiumEl.offsetLeft + 250, stadiumEl.offsetTop + 170);
-draciel.spawn(stadiumEl.offsetLeft + 350, stadiumEl.offsetTop + 210);
-byakko.spawn(stadiumEl.offsetLeft + 450, stadiumEl.offsetTop + 250);
+// dragoon.spawn(stadiumEl.offsetLeft + 150, stadiumEl.offsetTop + 130);
+// dranzer.spawn(stadiumEl.offsetLeft + 250, stadiumEl.offsetTop + 170);
+// draciel.spawn(stadiumEl.offsetLeft + 350, stadiumEl.offsetTop + 210);
+// byakko.spawn(stadiumEl.offsetLeft + 450, stadiumEl.offsetTop + 250);
+
+
 
 let engine = null;
 
@@ -70,27 +79,50 @@ BattleEngine.onEnd = winner => {
 const countdownSound = new Audio('goshoot.mp3');
 
 launchBtn.addEventListener('click', () => {
-    if (engine?.running) return;
-    launchBtn.disabled = true;
+  if (engine?.running) return;
+  launchBtn.disabled = true;
 
-    // Play countdown sound
-    countdownSound.currentTime = 0;
-    countdownSound.play();
+  countdownSound.currentTime = 0;
+  countdownSound.play();
 
-    // Reset stamina & positions each battle
-    [dragoon, dranzer].forEach(b => {
-        b.stamina = b.maxStamina;
-        b.velX = Math.random() * 4 - 2;
-        b.velY = Math.random() * 4 - 2;
-        b.element.style.animation = `spin ${b.spinDuration} linear infinite`;
-    });
+  // 1. Get the selected player's Beyblade from dropdown
+  const selectedId = beySelect.value;
+  const playerBlade = beyOptions[selectedId];
 
-    dragoon.posX = stadiumEl.offsetLeft + 550;
-    dragoon.posY = stadiumEl.offsetTop + 550;
-    dranzer.posX = stadiumEl.offsetLeft + -200;
-    dranzer.posY = stadiumEl.offsetTop + -200;
+  // 2. Choose a random enemy Beyblade (not the same one)
+  const enemyCandidates = Object.keys(beyOptions).filter(id => id !== selectedId);
+  const randomId = enemyCandidates[Math.floor(Math.random() * enemyCandidates.length)];
+  const enemyBlade = beyOptions[randomId];
 
-    // Create new engine instance
-    engine = new BattleEngine(stadiumEl, [dragoon, dranzer, draciel, byakko]);
-    engine.start();
+  // 3. Hide all Beyblades and stamina bars
+  Object.values(beyOptions).forEach(b => {
+    b.element.style.display = "none";
+    b.staminaBar.style.display = "none";
+  });
+
+  // 4. Reset selected blades
+  [playerBlade, enemyBlade].forEach(b => {
+    b.stamina = b.maxStamina;
+    b.velX = Math.random() * 4 - 2;
+    b.velY = Math.random() * 4 - 2;
+    b.element.style.animation = `spin ${b.spinDuration} linear infinite`;
+  });
+
+  const rect = stadiumEl.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // Offset slightly so they don't overlap but still stay in the stadium
+  playerBlade.posX = centerX + 80;
+  playerBlade.posY = centerY;
+
+  enemyBlade.posX = centerX - 80;
+  enemyBlade.posY = centerY;
+
+  // 6. Show only selected blades
+  [playerBlade, enemyBlade].forEach(b => b.spawn(b.posX, b.posY));
+
+  // 7. Start the battle
+  engine = new BattleEngine(stadiumEl, [playerBlade, enemyBlade]);
+  engine.start();
 });
