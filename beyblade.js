@@ -2,7 +2,7 @@
 // Defines the Beyblade class and all related behavior
 
 export default class Beyblade {
-    constructor(id, name, owner, { stamina = 700, power = 150, type = "balance" } = {}) {
+    constructor(id, name, owner, { stamina = 100, power = 550, type = "balance" } = {}) {
         this.id = id;
         this.name = name;
         this.owner = owner;
@@ -12,7 +12,6 @@ export default class Beyblade {
         this.type = type; 
         this.lastHitTime = 0;
         this.clockwise = true;
-
       
         this.posX = 0;
         this.posY = 0;
@@ -23,8 +22,8 @@ export default class Beyblade {
     /** Adjust base stats based on Beyblade type */
     setStatsByType(baseStamina, basePower) {
       switch (this.type) {
-        case "attack":
-          this.power = basePower + 100;
+        case "attacks":
+          this.power = basePower + 40;
           this.stamina = baseStamina - 200;
           break;
         case "defense":
@@ -70,14 +69,15 @@ export default class Beyblade {
   
       const bar = this.staminaBar;
       bar.style.display = "block";
-      bar.style.width = "100%";
+      bar.querySelector(".fill").style.width = "100%";
+
     }
   
     drain(amount) {
       this.stamina = Math.max(0, this.stamina - amount);
   
       const pct = (this.stamina / this.maxStamina) * 100;
-      this.staminaBar.style.width = pct + "%";
+      this.staminaBar.querySelector(".fill").style.width = pct + "%";
   
       this.element.style.animationDuration = this.spinDuration;
   
