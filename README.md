@@ -28,3 +28,23 @@ This project is inspired by the Beyblade spinning top game. It may include inter
 No frameworks or libraries are used at this stage, to keep the focus on core JavaScript learning.
 
 ## 📁 Project Structure
+/beyblade-project
+│
+├── index.html # Main HTML file
+├── style.css # Styles for layout and visuals
+├── script.js # JavaScript logic
+└── README.md # Project description and info
+
+
+## 📝 Notes
+
+- This project is **not production-ready** — it's a learning tool.
+- Code may be experimental or contain bugs as I continue to explore new concepts.
+
+## 🤝 Contributing
+
+Although this is a personal learning project, **feel free to fork it, use it, or suggest improvements**! I'd love to see how others approach similar ideas.
+
+## 📬 Contact
+
+If you have feedback or suggestions, feel free to reach out or open an issue!
